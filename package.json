@@ -1,5 +1,5 @@
 {
-  "name": "facebook-node--withFetch",
+  "name": "facebook-node-withFetch",
   "description": "NodeJS Library for Facebook with fetch API support",
   "keywords": [
     "facebook",
