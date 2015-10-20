@@ -17,8 +17,8 @@ describe('FB.api', function () {
         describe("FB.api('4', cb)", function () {
 
             beforeEach(function () {
-                nock('https://graph.facebook.com:443')
-                    .get('/4')
+                nock('https://graph.facebook.com')
+                    .get('/v2.0/4')
                     .reply(200, "{\"id\":\"4\",\"name\":\"Mark Zuckerberg\",\"first_name\":\"Mark\",\"last_name\":\"Zuckerberg\",\"link\":\"http:\\/\\/www.facebook.com\\/zuck\",\"username\":\"zuck\",\"gender\":\"male\",\"locale\":\"en_US\"}", { 'access-control-allow-origin': '*',
                         'content-type': 'text/javascript; charset=UTF-8',
                         'content-length': '172' });
@@ -43,7 +43,7 @@ describe('FB.api', function () {
         describe("FB.api('/4', cb)", function () {
             it('should have id 4', function (done) {
                 nock('https://graph.facebook.com:443')
-                    .get('/4')
+                    .get('/v2.0/4')
                     .reply(200, "{\"id\":\"4\",\"name\":\"Mark Zuckerberg\",\"first_name\":\"Mark\",\"last_name\":\"Zuckerberg\",\"link\":\"http:\\/\\/www.facebook.com\\/zuck\",\"username\":\"zuck\",\"gender\":\"male\",\"locale\":\"en_US\"}", { 'access-control-allow-origin': '*',
                         'content-type': 'text/javascript; charset=UTF-8',
                         'content-length': '172' });
@@ -67,7 +67,7 @@ describe('FB.api', function () {
         describe("FB.api('4', { fields: 'id' }), cb)", function () {
             it("should return { id: '4' } object", function (done) {
                 nock('https://graph.facebook.com:443')
-                    .get('/4?fields=id')
+                    .get('/v2.0/4?fields=id')
                     .reply(200, "{\"id\":\"4\"}", {
                         'content-type': 'text/javascript; charset=UTF-8',
                         'content-length': '10' });
@@ -82,7 +82,7 @@ describe('FB.api', function () {
         describe("FB.api('4?fields=name', cb)", function () {
             it("should return { id: '4' } object", function (done) {
                 nock('https://graph.facebook.com:443')
-                    .get('/4?fields=name')
+                    .get('/v2.0/4?fields=name')
                     .reply(200, "{\"name\":\"Mark Zuckerberg\",\"id\":\"4\"}", {
                         'content-type': 'text/javascript; charset=UTF-8',
                         'content-length': '10' });
@@ -97,7 +97,7 @@ describe('FB.api', function () {
         describe("FB.api('/4?fields=name', cb)", function () {
             it("should return { id: '4', name: 'Mark Zuckerberg' } object", function (done) {
                 nock('https://graph.facebook.com:443')
-                    .get('/4?fields=name')
+                    .get('/v2.0/4?fields=name')
                     .reply(200, "{\"name\":\"Mark Zuckerberg\",\"id\":\"4\"}", {
                         'content-type': 'text/javascript; charset=UTF-8',
                         'content-length': '10' });

@@ -259,6 +259,10 @@
                 uri = 'https://api-read.facebook.com/' + path;
             }
 
+            requestOptions = {
+                  method: method
+            };
+
             if(method === 'post') {
                 body = '';
                 if(params.access_token) {
@@ -289,6 +293,7 @@
 
                 if(body.length > 0) {
                     body = body.substring(0, body.length - 1);
+                    requestOptions.body = body;
                 }
             } else {
                 if((uri.indexOf("?") !== -1)) {
@@ -307,21 +312,13 @@
                 uri = uri.substring(0, uri.length -1);
             };
             
-            pool = { maxSockets : options('maxSockets') || Number(process.env.MAX_SOCKETS) || 5 };
-            requestOptions = {
-                  method: method
-                , uri: uri
-                , body: body
-                , pool: pool
-                , mode: 'cors'
-            };
+            
             if(options('proxy')) {
                 requestOptions['proxy'] = options('proxy');
             }
             if(options('timeout')) {
                 requestOptions['timeout'] = options('timeout');
             }
-
             request(uri, requestOptions)
                 .then((response) => {
                     if (response.status != 200) {
@@ -665,8 +662,9 @@
                 if(options('proxy')) {
                     requestOptions['proxy'] = options('proxy');
                 }
-             
-                request(uri, requestOptions)
+                
+
+                request(requestOptions.uri, requestOptions)
                     .then((response) => {
                         // ignore error/response
                     });
