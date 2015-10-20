@@ -2,7 +2,7 @@
 
     var FB = (function() {
 
-        var   request = require('request')
+        var  request = (typeof fetch == 'function') ? fetch : require('node-fetch')
             , crypto  = require('crypto')
             , version = require(require('path').resolve(__dirname, 'package.json')).version
             , getLoginUrl
@@ -313,6 +313,7 @@
                 , uri: uri
                 , body: body
                 , pool: pool
+                , mode: 'cors'
             };
             if(options('proxy')) {
                 requestOptions['proxy'] = options('proxy');
@@ -320,34 +321,32 @@
             if(options('timeout')) {
                 requestOptions['timeout'] = options('timeout');
             }
-            request(requestOptions
-            , function(error, response, body) {
-                if(error !== null) {
-                    if(error === Object(error) && has(error, 'error')) {
+
+            request(uri, requestOptions)
+                .then((response) => {
+                    if (response.status != 200) {
+                        var error = {};
+                        error.status = response.status;
+                        error.statusText = response.statusText;
+                        error.body = response._bodyText;
+                        return cb({ error: error });
+                    }
+
+                    if (isOAuthRequest && response && response.status === 200 && response.headers && /.*text\/plain.*/.test(response.headers.get('content-type'))) {
+                        return cb(parseOAuthApiResponse(response));
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then((json) => {
+                    cb(json);
+                })
+                .catch(function(error) {
+                    if (error === Object(error) && has(error, 'error')) {
                         return cb(error);
                     }
-                    return cb({error:error});
-                }
-
-                if(isOAuthRequest && response && response.statusCode === 200 &&
-                    response.headers && /.*text\/plain.*/.test(response.headers['content-type'])) {
-                    cb(parseOAuthApiResponse(body));
-                } else {
-                    var json;
-                    try {
-                        json = JSON.parse(body);
-                    } catch (ex) {
-                      // sometimes FB is has API errors that return HTML and a message
-                      // of "Sorry, something went wrong". These are infrequent and unpredictable but
-                      // let's not let them blow up our application.
-                      json =  { error: {
-                          code: 'JSONPARSE',
-                          Error: ex
-                      }};
-                    }
-                    cb(json);
-                }
-            });
+                    cb({ error: error});
+                });
         };
 
         parseOAuthApiResponse = function (body) {
@@ -653,19 +652,22 @@
             try {
                 var requestOptions = {
                     method: 'POST'
-                    , uri: 'https://www.facebook.com/impression.php'
-                    , form: {
-                        plugin: 'featured_resources',
-                        payload: encodeURIComponent(JSON.stringify(payload))
-                    }
+                    , uri: 'https://www.facebook.com/impression.php',
+                    mode: 'cors'
                 };
+
+                var formData = new FormData();
+                formData.append('plugin', 'featured_resources');
+                formData.append('payload', encodeURIComponent(JSON.stringify(payload)));
+
+                requestOptions.body = formData;
+
                 if(options('proxy')) {
                     requestOptions['proxy'] = options('proxy');
                 }
-			
-                request(
-                    requestOptions
-                    , function(error, response, body) {
+             
+                request(uri, requestOptions)
+                    .then((response) => {
                         // ignore error/response
                     });
             } catch (e) {
